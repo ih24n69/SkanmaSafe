@@ -1,0 +1,9 @@
+<resources>
+    <color name="bg_menu_fab">#0488ff</color>
+	<color name="bg_splash">#0092ff</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="red">#f40000</color>
+</resources>

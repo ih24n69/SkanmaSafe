@@ -1,0 +1,19 @@
+# Gradle build
+/build
+/app/build
+/.gradle
+
+# IDE files
+/.idea
+*.iml
+
+# Local config
+local.properties
+
+# Keystore and signing configs
+keystore.properties
+*.jks
+*.keystore
+
+# Misc
+.DS_Store

@@ -1,0 +1,5 @@
+
+<resources>
+    <string name="app_name">SkanmaSafe</string>
+    <string name="default_url">http://v1.sandroidteam.com:8155</string>
+</resources>
