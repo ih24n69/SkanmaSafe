@@ -1,14 +1,15 @@
 # SkanmaSafe
 
 Aplikasi Android untuk ujian berbasis browser.
-Memiliki fitur:
+---
+## 🚀 Fitur
+
 	1. Block Navbar dan gesture
 	2. Block Statusbar
 	3. Block SplitScreen
 	5. Tombol menu makai Fab
 	6. Ada suara alarm bila keluar aplikasi.
 	7. Diseting untuk adnroid API 28 (Android 9 "Pie") s/d API 36 (Android 16 "Baklava")
----
 
 ## 🚀 Cara Menjalankan
 
@@ -24,7 +25,7 @@ Memiliki fitur:
 
 # CATATAN
 
-1. Untuk merubah url yagn di akses berada di "app\src\main\res\values\strings.xml", ubah value default_url.
+1. Untuk merubah url yang di akses berada di "app\src\main\res\values\strings.xml", ubah value default_url.
 
 # Tampilan
 
