@@ -27,26 +27,29 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         android:usesCleartextTraffic="true">
-		
-		<activity
-			android:name=".SplashActivity"
-			android:exported="true">
-			<intent-filter>
-				<action android:name="android.intent.action.MAIN"/>
-				<category android:name="android.intent.category.LAUNCHER"/>
-			</intent-filter>
-		</activity>
 
-        <!-- Activity utama -->
+        <!-- Splash screen -->
         <activity
-            android:name=".MainActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <!-- Activity ujian -->
+        <!-- Main menu activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true" />
+
+        <!-- Input Link Activity -->
+        <activity
+            android:name=".InputLinkActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Exam Activity -->
         <activity
             android:name=".ExamActivity"
             android:exported="false"
@@ -56,13 +59,10 @@
             android:screenOrientation="portrait"
             android:showWhenLocked="true"
             android:turnScreenOn="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="http" />
                 <data android:scheme="https" />
             </intent-filter>
@@ -71,7 +71,7 @@
         <!-- Device Admin Receiver -->
         <receiver
             android:name=".MyAdminReceiver"
-			android:exported="true"
+            android:exported="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
                 android:name="android.app.device_admin"

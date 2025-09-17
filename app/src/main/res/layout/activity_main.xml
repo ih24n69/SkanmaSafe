@@ -27,34 +27,41 @@
         android:gravity="center"
         android:layout_marginBottom="32dp" />
 
-    <!-- Input URL -->
-    <EditText
-        android:id="@+id/urlInput"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Masukkan URL ujian"
-        android:inputType="textUri"
-        android:background="@drawable/rounded_edittext"
-        android:padding="12dp"
-        android:layout_marginBottom="16dp" />
 
-    <!-- Tombol Mulai Ujian Default -->
-    <Button
-        android:id="@+id/startDefaultButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Mulai Ujian (Default)"
-        android:background="@drawable/rounded_button"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="12dp" />
+	<Button
+		android:layout_marginTop="60dp"
+		android:id="@+id/btnInputLink"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/rounded_button"
+		android:textColor="#FFFFFF"
+		android:text="Masukkan Tautan" 
+		android:layout_marginBottom="12dp"/>
 
-    <!-- Tombol Mulai Ujian Manual -->
-    <Button
-        android:id="@+id/startManualButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Mulai Ujian (Manual)"
-        android:background="@drawable/rounded_button"
-        android:textColor="#FFFFFF" />
+	<Button
+		android:id="@+id/btnMulaiUjian"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/rounded_button"
+		android:textColor="#FFFFFF"
+		android:text="Mulai Ujian" 
+		android:layout_marginBottom="12dp"/>
 
+	<Button
+		android:id="@+id/btnPeraturan"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/rounded_button"
+		android:textColor="#FFFFFF"
+		android:text="Peraturan Ujian" 
+		android:layout_marginBottom="12dp"/>
+
+	<Button
+		android:id="@+id/btnAbout"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/rounded_button"
+		android:textColor="#FFFFFF"
+		android:text="Tentang Aplikasi" 
+		android:layout_marginBottom="12dp"/>
 </LinearLayout>
