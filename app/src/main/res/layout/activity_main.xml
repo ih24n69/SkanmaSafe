@@ -27,24 +27,23 @@
         android:gravity="center"
         android:layout_marginBottom="32dp" />
 
-
 	<Button
 		android:layout_marginTop="60dp"
-		android:id="@+id/btnInputLink"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:background="@drawable/rounded_button"
-		android:textColor="#FFFFFF"
-		android:text="Masukkan Tautan" 
-		android:layout_marginBottom="12dp"/>
-
-	<Button
 		android:id="@+id/btnMulaiUjian"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:background="@drawable/rounded_button"
 		android:textColor="#FFFFFF"
 		android:text="Mulai Ujian" 
+		android:layout_marginBottom="12dp"/>
+	
+	<Button
+		android:id="@+id/btnInputLink"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:background="@drawable/rounded_button"
+		android:textColor="#FFFFFF"
+		android:text="Masukkan Tautan" 
 		android:layout_marginBottom="12dp"/>
 
 	<Button
