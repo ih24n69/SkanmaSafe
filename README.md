@@ -23,15 +23,21 @@ Aplikasi Android untuk ujian berbasis browser.
 4. Pastikan file `.jks` ada di path yang sesuai
 5. Build > Generate Signed APK   
 
-# CATATAN
+## Catatan
 
 1. Untuk merubah url yang di akses berada di "app\src\main\res\values\strings.xml", ubah value default_url.
 
-# Tampilan
+## Tampilan
 
-1. Splash Screen
+###1. Splash Screen
 ![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/splash.jpg)
-2. Halaman Awal
+###2. Halaman Awal
 ![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/beranda.jpg)
-3. Halaman Exam
+###3. Halaman Input Link
+![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/input_link.jpg)
+###4. Halaman Peraturan
+![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/aturan.jpg)
+###5. Halaman Exam
 ![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/ujian.jpg)
+###6. Halaman Tentang Aplikasi
+![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/Tentang.jpg)
