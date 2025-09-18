@@ -26,6 +26,7 @@ Aplikasi Android untuk ujian berbasis browser.
 ## Catatan
 
 1. Untuk merubah url yang di akses berada di "app\src\main\res\values\strings.xml", ubah value default_url.
+2. Peraturan dan Tentang Aplikasi menggunakan webview yang mengarah ke html statik di server, bisa disesuaikan di MainActivity
 
 ## Tampilan
 
@@ -40,4 +41,4 @@ Aplikasi Android untuk ujian berbasis browser.
 ### 5. Halaman Exam
 ![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/ujian.jpg)
 ### 6. Halaman Tentang Aplikasi
-![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/Tentang.jpg)
+![Ih24n69](https://raw.githubusercontent.com/ih24n69/SkanmaSafe/refs/heads/main/tentang.jpg)
