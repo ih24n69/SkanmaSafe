@@ -1,51 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-	android:keepScreenOn="true">
+    android:keepScreenOn="true">
 
-    <!-- WebView utama -->
+    <!-- STATUS BAR CUSTOM -->
+    <LinearLayout
+        android:id="@+id/statusBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:background="#222"
+        android:gravity="center_vertical"
+        android:elevation="4dp">
+
+        <!-- Jam realtime -->
+        <TextView
+            android:id="@+id/tvClock"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="00:00"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_weight="1"/>
+
+        <!-- Ikon baterai -->
+        <ImageView
+            android:id="@+id/ivBattery"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_battery_full"
+            android:tint="@android:color/white"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- Persentase baterai -->
+        <TextView
+            android:id="@+id/tvBattery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="100%"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"/>
+    </LinearLayout>
+
+    <!-- WEBVIEW UTAMA -->
     <WebView
         android:id="@+id/webView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/statusBar"/>
 
-    <!-- Tombol utama (menu) -->
+    <!-- FAB MENU MELAYANG -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="50dp"
         android:src="@drawable/ic_menu"
         android:contentDescription="Menu"
-        app:backgroundTint="@color/bg_menu_fab" />
+        app:backgroundTint="@color/bg_menu_fab"/>
 
-    <!-- Tombol refresh -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabRefresh"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="110dp"
         android:src="@drawable/ic_refresh"
         android:contentDescription="Refresh"
         android:visibility="gone"
-        app:backgroundTint="@color/teal_200" />
+        app:backgroundTint="@color/teal_200"/>
 
-    <!-- Tombol keluar -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabExit"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
         android:layout_marginEnd="24dp"
-        android:layout_marginBottom="90dp"
+        android:layout_marginBottom="160dp"
         android:src="@drawable/ic_exit"
         android:contentDescription="Exit"
         android:visibility="gone"
-        app:backgroundTint="@color/red" />
+        app:backgroundTint="@color/red"/>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>

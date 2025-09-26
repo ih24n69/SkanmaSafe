@@ -18,13 +18,18 @@ package id.ihsan.smk5.skanmasafe;
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
@@ -32,6 +37,8 @@ import android.view.animation.OvershootInterpolator;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -39,12 +46,58 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class ExamActivity extends AppCompatActivity {
 
     private MediaPlayer alarmPlayer;
     private boolean isFabOpen = false;
     private FloatingActionButton fabMain, fabMenu1, fabMenu2;
-	private boolean isShowingExitDialog = false;
+    private boolean isShowingExitDialog = false;
+
+    // Tambahan jam & baterai
+    private TextView tvClock, tvBattery;
+    private ImageView ivBattery;
+    private Handler clockHandler = new Handler();
+    private Runnable clockRunnable;
+
+    private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+
+        int batteryPct = (int) (level * 100 / (float) scale);
+        tvBattery.setText(batteryPct + "%");
+
+        // === Fallback ke vector asset aplikasi sendiri ===
+            if (status == BatteryManager.BATTERY_STATUS_CHARGING) {
+                ivBattery.setImageResource(R.drawable.ic_battery_charging);
+            } else {
+                if (batteryPct >= 95) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_full);
+                } else if (batteryPct >= 80) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_80);
+				} else if (batteryPct >= 70) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_70);
+				} else if (batteryPct >= 50) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_50);
+				} else if (batteryPct >= 40) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_40);
+				} else if (batteryPct >= 30) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_30);
+				} else if (batteryPct >= 20) {
+                    ivBattery.setImageResource(R.drawable.ic_battery_20);
+                } else {
+                    ivBattery.setImageResource(R.drawable.ic_battery_alert);
+                }
+            }
+    }
+};
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +123,26 @@ public class ExamActivity extends AppCompatActivity {
         fabMain.setOnClickListener(v -> toggleFabMenu());
         fabMenu1.setOnClickListener(v -> webView.reload());
         fabMenu2.setOnClickListener(v -> showExitDialog());
+
+        // Inisialisasi jam & baterai
+        tvClock = findViewById(R.id.tvClock);
+        tvBattery = findViewById(R.id.tvBattery);
+        ivBattery = findViewById(R.id.ivBattery);
+
+        // Update jam realtime
+        clockRunnable = new Runnable() {
+            @Override
+            public void run() {
+                String currentTime = new SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+                        .format(new Date());
+                tvClock.setText(currentTime);
+                clockHandler.postDelayed(this, 1000);
+            }
+        };
+        clockHandler.post(clockRunnable);
+
+        // Register battery receiver
+        registerReceiver(batteryReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         // WebView setting
         WebSettings webSettings = webView.getSettings();
@@ -126,91 +199,88 @@ public class ExamActivity extends AppCompatActivity {
                 Toast.makeText(this,
                         "Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum melanjutkan ujian!",
                         Toast.LENGTH_LONG).show();
-						stopLockTask();
-						finish();
+                stopLockTask();
+                finish();
             }
         }
-		if ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
-			getWindow().setFlags(
-					WindowManager.LayoutParams.FLAG_SECURE,
-					WindowManager.LayoutParams.FLAG_SECURE
-			);
-		}
-		// === Blokir overlay eksternal (Android 12+) ===
+        if ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
+            getWindow().setFlags(
+                    WindowManager.LayoutParams.FLAG_SECURE,
+                    WindowManager.LayoutParams.FLAG_SECURE
+            );
+        }
+        // === Blokir overlay eksternal (Android 12+) ===
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-		try {
-			getWindow().setHideOverlayWindows(true);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-			// fallback: kasih warning ke user
-			Toast.makeText(this,
-				"Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum ujian!",
-				Toast.LENGTH_LONG).show();
-				stopLockTask();
-				finish();
-		}
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-		if (isInMultiWindowMode() || isInPictureInPictureMode()) {
-			Toast.makeText(this,
-					"Mode multi-window / PiP tidak diizinkan saat ujian",
-					Toast.LENGTH_LONG).show();
-			stopLockTask();
-			finish();
-			}
-			}
-		}
-	}
-	
-	@Override
-	public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
-		super.onMultiWindowModeChanged(isInMultiWindowMode);
-		if (isInMultiWindowMode) {
-			Toast.makeText(this, "Mode multi-window tidak diizinkan saat ujian", Toast.LENGTH_LONG).show();
-			stopLockTask();
-			finish();
-		}
-	}
+            try {
+                getWindow().setHideOverlayWindows(true);
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                Toast.makeText(this,
+                        "Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum ujian!",
+                        Toast.LENGTH_LONG).show();
+                stopLockTask();
+                finish();
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                if (isInMultiWindowMode() || isInPictureInPictureMode()) {
+                    Toast.makeText(this,
+                            "Mode multi-window / PiP tidak diizinkan saat ujian",
+                            Toast.LENGTH_LONG).show();
+                    stopLockTask();
+                    finish();
+                }
+            }
+        }
+    }
 
-	@Override
-	public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
-		super.onPictureInPictureModeChanged(isInPictureInPictureMode);
-		if (isInPictureInPictureMode) {
-			Toast.makeText(this, "Mode Picture-in-Picture tidak diizinkan saat ujian", Toast.LENGTH_LONG).show();
-			stopLockTask();
-			finish();
-		}
-	}
-	
-	@Override
-	public void onWindowFocusChanged(boolean hasFocus) {
-		super.onWindowFocusChanged(hasFocus);
+    @Override
+    public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode);
+        if (isInMultiWindowMode) {
+            Toast.makeText(this, "Mode multi-window tidak diizinkan saat ujian", Toast.LENGTH_LONG).show();
+            stopLockTask();
+            finish();
+        }
+    }
 
-		if (!hasFocus && !isShowingExitDialog) {
-			// Bisa jadi ada overlay di atas (misalnya chat head)
-			Toast.makeText(this, "Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian", Toast.LENGTH_LONG).show();
-			stopLockTask();
-			finish();
-		}
-	}
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode);
+        if (isInPictureInPictureMode) {
+            Toast.makeText(this, "Mode Picture-in-Picture tidak diizinkan saat ujian", Toast.LENGTH_LONG).show();
+            stopLockTask();
+            finish();
+        }
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (!hasFocus && !isShowingExitDialog) {
+            Toast.makeText(this, "Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian", Toast.LENGTH_LONG).show();
+            stopLockTask();
+            finish();
+        }
+    }
 
     /** Konfirmasi keluar ujian */
     private void showExitDialog() {
-		isShowingExitDialog = true;
-		new AlertDialog.Builder(this)
-				.setTitle("Konfirmasi")
-				.setMessage("Yakin ingin keluar dari ujian?")
-				.setPositiveButton("Ya", (dialog, which) -> {
-					isShowingExitDialog = false;
-					stopLockTask();
-					finish();
-				})
-				.setNegativeButton("Tidak", (dialog, which) -> {
-					isShowingExitDialog = false;
-					dialog.dismiss();
-				})
-				.setOnDismissListener(d -> isShowingExitDialog = false)
-				.show();
-	}
+        isShowingExitDialog = true;
+        new AlertDialog.Builder(this)
+                .setTitle("Konfirmasi")
+                .setMessage("Yakin ingin keluar dari ujian?")
+                .setPositiveButton("Ya", (dialog, which) -> {
+                    isShowingExitDialog = false;
+                    stopLockTask();
+                    finish();
+                })
+                .setNegativeButton("Tidak", (dialog, which) -> {
+                    isShowingExitDialog = false;
+                    dialog.dismiss();
+                })
+                .setOnDismissListener(d -> isShowingExitDialog = false)
+                .show();
+    }
 
     /** Tolak multi-window dan Picture-in-Picture */
     private void blockMultiWindowAndPip() {
@@ -332,4 +402,12 @@ public class ExamActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        clockHandler.removeCallbacks(clockRunnable);
+        unregisterReceiver(batteryReceiver);
+    }
 }
+
