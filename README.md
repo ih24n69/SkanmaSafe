@@ -9,7 +9,12 @@ Aplikasi Android untuk ujian berbasis browser.
 	3. Block SplitScreen
 	5. Tombol menu makai Fab
 	6. Ada suara alarm bila keluar aplikasi.
-	7. Diseting untuk adnroid API 28 (Android 9 "Pie") s/d API 36 (Android 16 "Baklava")
+	7. Anti screenshot & screen recording
+	8. Layar selalu menyala (anti sleep)
+	9. Blokir multi-window & PiP
+	10. Blokir overlay (chat head, filter, dll)
+	11. Cegah copy–paste di WebView
+	12. Diseting untuk adnroid API 28 (Android 9 "Pie") s/d API 36 (Android 16 "Baklava")
 
 ## 🚀 Cara Menjalankan
 

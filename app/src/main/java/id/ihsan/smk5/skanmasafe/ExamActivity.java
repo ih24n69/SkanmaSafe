@@ -23,15 +23,18 @@ import android.media.MediaPlayer;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -41,24 +44,32 @@ public class ExamActivity extends AppCompatActivity {
     private MediaPlayer alarmPlayer;
     private boolean isFabOpen = false;
     private FloatingActionButton fabMain, fabMenu1, fabMenu2;
+	private boolean isShowingExitDialog = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exam);
 
-        WebView webView = findViewById(R.id.webView);
-        //Button exitButton = findViewById(R.id.exitButton);
+        // === Blokir screenshot & rekam layar ===
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_SECURE,
+                WindowManager.LayoutParams.FLAG_SECURE
+        );
 
-        // ==================== FAB Menu ==================== //
+        // === Keep screen ON ===
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        WebView webView = findViewById(R.id.webView);
+
+        // FAB Menu
         fabMain = findViewById(R.id.fabMain);
         fabMenu1 = findViewById(R.id.fabRefresh);
         fabMenu2 = findViewById(R.id.fabExit);
 
         fabMain.setOnClickListener(v -> toggleFabMenu());
-        fabMenu1.setOnClickListener(v -> Toast.makeText(this, "Refresh", Toast.LENGTH_SHORT).show());
-        fabMenu2.setOnClickListener(v -> Toast.makeText(this, "Keluar", Toast.LENGTH_SHORT).show());
-        // ================================================== //
+        fabMenu1.setOnClickListener(v -> webView.reload());
+        fabMenu2.setOnClickListener(v -> showExitDialog());
 
         // WebView setting
         WebSettings webSettings = webView.getSettings();
@@ -70,6 +81,10 @@ public class ExamActivity extends AppCompatActivity {
         webSettings.setDefaultTextEncodingName("utf-8");
         webSettings.setLoadsImagesAutomatically(true);
 
+        // Blokir long-press (anti copy paste, keyboard tetap jalan)
+        webView.setOnLongClickListener(v -> true);
+        webView.setLongClickable(false);
+
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -80,6 +95,7 @@ public class ExamActivity extends AppCompatActivity {
             }
         });
 
+        // Load URL
         String rawUrl = getIntent().getStringExtra("url");
         String url = normalizeUrl(rawUrl);
 
@@ -91,12 +107,122 @@ public class ExamActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
         }
 
+        // Lock ke exam mode
         lockExamMode();
         startLockTaskMode();
-		fabMenu1.setOnClickListener(v -> {
-            webView.reload();
-        });
-        fabMenu2.setOnClickListener(v -> finish());
+
+        // Cek multiwindow / overlay
+        blockMultiWindowAndPip();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Android 6 - 11 → hanya bisa warning overlay dan kembali ke halaman awal
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            if (Settings.canDrawOverlays(this)) {
+                Toast.makeText(this,
+                        "Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum melanjutkan ujian!",
+                        Toast.LENGTH_LONG).show();
+						stopLockTask();
+						finish();
+            }
+        }
+		if ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
+			getWindow().setFlags(
+					WindowManager.LayoutParams.FLAG_SECURE,
+					WindowManager.LayoutParams.FLAG_SECURE
+			);
+		}
+		// === Blokir overlay eksternal (Android 12+) ===
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+		try {
+			getWindow().setHideOverlayWindows(true);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+			// fallback: kasih warning ke user
+			Toast.makeText(this,
+				"Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum ujian!",
+				Toast.LENGTH_LONG).show();
+				stopLockTask();
+				finish();
+		}
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+		if (isInMultiWindowMode() || isInPictureInPictureMode()) {
+			Toast.makeText(this,
+					"Mode multi-window / PiP tidak diizinkan saat ujian",
+					Toast.LENGTH_LONG).show();
+			stopLockTask();
+			finish();
+			}
+			}
+		}
+	}
+	
+	@Override
+	public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+		super.onMultiWindowModeChanged(isInMultiWindowMode);
+		if (isInMultiWindowMode) {
+			Toast.makeText(this, "Mode multi-window tidak diizinkan saat ujian", Toast.LENGTH_LONG).show();
+			stopLockTask();
+			finish();
+		}
+	}
+
+	@Override
+	public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
+		super.onPictureInPictureModeChanged(isInPictureInPictureMode);
+		if (isInPictureInPictureMode) {
+			Toast.makeText(this, "Mode Picture-in-Picture tidak diizinkan saat ujian", Toast.LENGTH_LONG).show();
+			stopLockTask();
+			finish();
+		}
+	}
+	
+	@Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+
+		if (!hasFocus && !isShowingExitDialog) {
+			// Bisa jadi ada overlay di atas (misalnya chat head)
+			Toast.makeText(this, "Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian", Toast.LENGTH_LONG).show();
+			stopLockTask();
+			finish();
+		}
+	}
+
+    /** Konfirmasi keluar ujian */
+    private void showExitDialog() {
+		isShowingExitDialog = true;
+		new AlertDialog.Builder(this)
+				.setTitle("Konfirmasi")
+				.setMessage("Yakin ingin keluar dari ujian?")
+				.setPositiveButton("Ya", (dialog, which) -> {
+					isShowingExitDialog = false;
+					stopLockTask();
+					finish();
+				})
+				.setNegativeButton("Tidak", (dialog, which) -> {
+					isShowingExitDialog = false;
+					dialog.dismiss();
+				})
+				.setOnDismissListener(d -> isShowingExitDialog = false)
+				.show();
+	}
+
+    /** Tolak multi-window dan Picture-in-Picture */
+    private void blockMultiWindowAndPip() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            if (isInMultiWindowMode() || isInPictureInPictureMode()) {
+                Toast.makeText(this,
+                        "Mode multi-window / PiP tidak diizinkan saat ujian",
+                        Toast.LENGTH_LONG).show();
+                stopLockTask();
+                finish();
+            }
+        }
     }
 
     /** Animasi FAB Menu */
@@ -186,18 +312,17 @@ public class ExamActivity extends AppCompatActivity {
         super.onStop();
         triggerAlarm();
     }
-	
-	@Override
-	public void onBackPressed() {
-		Toast.makeText(this, "Tombol kembali dinonaktifkan saat ujian", Toast.LENGTH_SHORT).show();
-	}
+
+    @Override
+    public void onBackPressed() {
+        Toast.makeText(this, "Tombol kembali dinonaktifkan saat ujian", Toast.LENGTH_SHORT).show();
+    }
 
     private void triggerAlarm() {
         try {
             AudioManager audio = (AudioManager) getSystemService(AUDIO_SERVICE);
             int maxVol = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-            int newVol = (int) (maxVol);
-            audio.setStreamVolume(AudioManager.STREAM_MUSIC, newVol, 0);
+            audio.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0);
 
             alarmPlayer = MediaPlayer.create(this,
                     Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.exit_alarm));
