@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package id.ihsan.smk5.skanmasafe;
+import id.ihsan.smk5.skanmasafe.ConnectionStatusManager;
 
 import android.animation.ObjectAnimator;
 import android.app.ActivityManager;
@@ -62,6 +63,9 @@ public class ExamActivity extends AppCompatActivity {
     private ImageView ivBattery;
     private Handler clockHandler = new Handler();
     private Runnable clockRunnable;
+	
+	// Monitoring Koneksi
+	private ConnectionStatusManager connectionStatusManager;
 
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
     @Override
@@ -103,6 +107,13 @@ public class ExamActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_exam);
+		
+		ImageView statusIcon = findViewById(R.id.statusIcon);
+        TextView statusText = findViewById(R.id.statusText);
+
+		/** Monitoring Koneksi */
+        connectionStatusManager = new ConnectionStatusManager(this, statusIcon, statusText);
+        connectionStatusManager.startMonitoring();
 
         // === Blokir screenshot & rekam layar ===
         getWindow().setFlags(

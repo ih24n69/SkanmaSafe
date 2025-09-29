@@ -6,45 +6,73 @@
     android:layout_height="match_parent"
     android:keepScreenOn="true">
 
-    <!-- STATUS BAR CUSTOM -->
-    <LinearLayout
-        android:id="@+id/statusBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp"
-        android:background="#222"
-        android:gravity="center_vertical"
-        android:elevation="4dp">
+		<!-- STATUS BAR CUSTOM -->
+    	<LinearLayout
+		android:id="@+id/statusBar"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:orientation="horizontal"
+		android:padding="8dp"
+		android:background="#222"
+		android:gravity="center_vertical"
+		android:elevation="4dp">
 
-        <!-- Jam realtime -->
-        <TextView
-            android:id="@+id/tvClock"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="00:00"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:layout_weight="1"/>
+		<!-- Jam realtime di kiri -->
+		<TextView
+			android:id="@+id/tvClock"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="00:00"
+			android:textColor="@android:color/white"
+			android:textSize="16sp"
+			android:layout_gravity="center_vertical" />
 
-        <!-- Ikon baterai -->
-        <ImageView
-            android:id="@+id/ivBattery"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_battery_full"
-            android:tint="@android:color/white"
-            android:layout_marginEnd="8dp"/>
+		<!-- Space untuk mempush elemen lain ke kanan -->
+		<Space
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:layout_weight="1" />
 
-        <!-- Persentase baterai -->
-        <TextView
-            android:id="@+id/tvBattery"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="100%"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"/>
-    </LinearLayout>
+		<!-- Ikon koneksi -->
+		<ImageView
+			android:id="@+id/statusIcon"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/ic_signal_good"
+			android:layout_gravity="center_vertical"
+			android:layout_marginEnd="4dp" />
+
+		<!-- Teks status koneksi -->
+		<TextView
+			android:id="@+id/statusText"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Koneksi bagus"
+			android:textColor="#FFFFFF"
+			android:textSize="14sp"
+			android:layout_gravity="center_vertical"
+			android:layout_marginEnd="8dp" />
+
+		<!-- Ikon baterai -->
+		<ImageView
+			android:id="@+id/ivBattery"
+			android:layout_width="24dp"
+			android:layout_height="24dp"
+			android:src="@drawable/ic_battery_full"
+			android:tint="@android:color/white"
+			android:layout_gravity="center_vertical"
+			android:layout_marginEnd="4dp" />
+
+		<!-- Persentase baterai -->
+		<TextView
+			android:id="@+id/tvBattery"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="100%"
+			android:textColor="@android:color/white"
+			android:textSize="16sp"
+			android:layout_gravity="center_vertical" />
+	</LinearLayout>
 
     <!-- WEBVIEW UTAMA -->
     <WebView
