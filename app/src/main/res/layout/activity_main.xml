@@ -7,25 +7,65 @@
     android:gravity="center_horizontal"
     android:background="@drawable/bg_gradient">
 
+    <!-- Greeting Section -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+		android:layout_marginTop="16dp">
+
+		<!-- Icon Mata / Bulan -->
+		<ImageView
+			android:id="@+id/greetingIcon"
+			android:layout_width="48dp"
+			android:layout_height="48dp"
+			android:src="@drawable/ic_sun"
+			android:layout_alignParentStart="true"
+			android:layout_alignParentTop="true" />
+
+		<!-- Greeting Text -->
+		<TextView
+			android:id="@+id/tvGreeting"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Hay, Selamat Pagi !"
+			android:textSize="20sp"
+			android:textStyle="bold"
+			android:textColor="#FFFFFF"
+			android:layout_below="@id/greetingIcon"
+			android:layout_alignStart="@id/greetingIcon"
+			android:layout_marginTop="4dp"/>
+
+		<!-- Sub Greeting Text -->
+		<TextView
+			android:id="@+id/tvSubGreeting"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:text="Selamat Datang di SMK Negeri 5 Sukoharjo"
+			android:textSize="14sp"
+			android:textColor="#FFFFFF"
+			android:layout_below="@id/tvGreeting"
+			android:layout_alignStart="@id/tvGreeting"
+			android:layout_marginTop="2dp"/>
+
+        <!-- Gambar Sekolah / Tidur -->
+        <ImageView
+            android:id="@+id/greetingImage"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/school_day" />
+    </RelativeLayout>
+
     <!-- Logo Sekolah -->
     <ImageView
+        android:layout_marginTop="30dp"
         android:id="@+id/logoImage"
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:src="@drawable/logo_smk5"
         android:layout_marginBottom="16dp" />
-
-    <!-- Teks Sambutan -->
-    <TextView
-        android:id="@+id/welcomeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Selamat Datang di\nSMK Negeri 5 Sukoharjo"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:gravity="center"
-        android:layout_marginBottom="32dp" />
 
 	<Button
 		android:layout_marginTop="60dp"

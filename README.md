@@ -15,7 +15,8 @@ Aplikasi Android untuk ujian berbasis browser.
 	10. Ada suara alarm bila keluar aplikasi.
 	11. Tombol menu makai Fab.
 	12. Statusbar custom tampilkan waktu/jam dan prosentase baterai
-	12. Diseting untuk adnroid API 28 (Android 9 "Pie") s/d API 36 (Android 16 "Baklava").
+	13. Greeting di halaman muka (Pagi,siang,sore,malam)
+	14. Diseting untuk adnroid API 28 (Android 9 "Pie") s/d API 36 (Android 16 "Baklava").
 
 ## 🚀 Cara Menjalankan
 

@@ -23,14 +23,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Calendar;
+
 public class MainActivity extends AppCompatActivity {
 
     private String DEFAULT_URL; // tidak final
+	private TextView tvGreeting;
+	private TextView tvSubGreeting;
+    private ImageView greetingIcon;
+    private ImageView greetingImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,5 +98,50 @@ public class MainActivity extends AppCompatActivity {
 					.setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
 					.show();
 		});
+		
+		tvGreeting = findViewById(R.id.tvGreeting);
+		tvSubGreeting = findViewById(R.id.tvSubGreeting);
+        greetingIcon = findViewById(R.id.greetingIcon);
+        greetingImage = findViewById(R.id.greetingImage);
+
+        setGreetingByTime();
+    }
+	
+	//Greeting
+	private void setGreetingByTime() {
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+        if (hour >= 5 && hour < 10) {
+            // Pagi
+            tvGreeting.setText("Hay, Selamat Pagi !");
+			tvSubGreeting.setText("Selamat Datang di SMKN 5 Sukoharjo.");
+            greetingIcon.setImageResource(R.drawable.ic_sun); // ikon matahari
+            greetingImage.setImageResource(R.drawable.school_day); // gambar sekolah pagi
+        } else if (hour >= 10 && hour < 15) {
+            // Siang
+            tvGreeting.setText("Selamat Siang, Kawan !");
+			tvSubGreeting.setText("Selamat Datang di SMKN 5 Sukoharjo.");
+            greetingIcon.setImageResource(R.drawable.ic_sun); 
+            greetingImage.setImageResource(R.drawable.school_day);
+        } else if (hour >= 15 && hour < 18) {
+            // Sore
+            tvGreeting.setText("Selamat Sore !");
+			tvSubGreeting.setText("Selamat menikmati senja ini.");
+            greetingIcon.setImageResource(R.drawable.ic_sun);
+            greetingImage.setImageResource(R.drawable.school_day);
+		} else if (hour >= 18 && hour < 21) {
+            // Sore
+            tvGreeting.setText("Helo, Selamat Malam !");
+			tvSubGreeting.setText("Selamat belajar, untuk masa depan.");
+            greetingIcon.setImageResource(R.drawable.ic_moon);
+            greetingImage.setImageResource(R.drawable.studying);
+        } else {
+            // Malam
+            tvGreeting.setText("Helo, Selamat Malam !");
+			tvSubGreeting.setText("Selamat beristirahat, jangan lupa berdoa.");
+            greetingIcon.setImageResource(R.drawable.ic_moon); // ikon bulan
+            greetingImage.setImageResource(R.drawable.take_sleep); // gambar tidur/bintang/lampu
+        }
     }
 }
