@@ -31,6 +31,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
@@ -242,8 +243,10 @@ public class ExamActivity extends AppCompatActivity {
                 }
             }
         }
+		updateFabVisibility();
     }
 
+	/** Anti Multi Window */
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
         super.onMultiWindowModeChanged(isInMultiWindowMode);
@@ -254,6 +257,7 @@ public class ExamActivity extends AppCompatActivity {
         }
     }
 
+	/** Anti PiP */
     @Override
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode);
@@ -264,15 +268,24 @@ public class ExamActivity extends AppCompatActivity {
         }
     }
 
+    /** Anti Floating Window */
     @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (!hasFocus && !isShowingExitDialog) {
-            Toast.makeText(this, "Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian", Toast.LENGTH_LONG).show();
-            stopLockTask();
-            finish();
-        }
-    }
+	public void onWindowFocusChanged(boolean hasFocus) {
+		super.onWindowFocusChanged(hasFocus);
+
+		if (!hasFocus && !isShowingExitDialog) {
+			// kasih delay biar nggak false-positive pas ada sistem toast "Got it"
+			new Handler(Looper.getMainLooper()).postDelayed(() -> {
+				if (!hasWindowFocus() && !isShowingExitDialog) { 
+					Toast.makeText(this, 
+							"Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian", 
+							Toast.LENGTH_LONG).show();
+					stopLockTask();
+					finish();
+				}
+			}, 800); // delay 0.8 detik (bisa disesuaikan 500-1000 ms)
+		}
+	}
 
     /** Konfirmasi keluar ujian */
     private void showExitDialog() {
@@ -342,13 +355,17 @@ public class ExamActivity extends AppCompatActivity {
         return activeNetwork != null && activeNetwork.isConnected();
     }
 
+    /** Scrren pinning */
     private void startLockTaskMode() {
-        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-        if (am.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_NONE) {
-            startLockTask();
-        }
-    }
+		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+		if (am.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_NONE) {
+			// sebelum pinning → sembunyikan FAB
+			updateFabVisibility();
+			startLockTask();
+		}
+	}
 
+	/** Merubah inputan URL */
     private String normalizeUrl(String url) {
         if (url == null || url.trim().isEmpty()) return null;
         url = url.trim();
@@ -420,5 +437,27 @@ public class ExamActivity extends AppCompatActivity {
         clockHandler.removeCallbacks(clockRunnable);
         unregisterReceiver(batteryReceiver);
     }
+	
+	/** Sembunyikan / tampilkan FAB sesuai kondisi screen pinning */
+	private void updateFabVisibility() {
+		ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+
+		boolean isPinned;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			isPinned = am.getLockTaskModeState() != ActivityManager.LOCK_TASK_MODE_NONE;
+		} else {
+			isPinned = am.isInLockTaskMode();
+		}
+
+		if (isPinned) {
+			// Sembunyikan FAB saat pinning aktif
+			fabMain.setVisibility(View.GONE);
+			fabMenu1.setVisibility(View.GONE);
+			fabMenu2.setVisibility(View.GONE);
+		} else {
+			// Munculkan lagi jika pinning selesai
+			fabMain.setVisibility(View.VISIBLE);
+		}
+	}
 }
 
