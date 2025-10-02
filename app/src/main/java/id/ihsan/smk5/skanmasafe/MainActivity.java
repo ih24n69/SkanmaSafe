@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
             tvGreeting.setText("Selamat Sore !");
 			tvSubGreeting.setText("Selamat menikmati senja ini.");
             greetingIcon.setImageResource(R.drawable.ic_sun);
-            greetingImage.setImageResource(R.drawable.school_day);
+            greetingImage.setImageResource(R.drawable.ic_sunset);
 		} else if (hour >= 18 && hour < 21) {
             // Sore
             tvGreeting.setText("Helo, Selamat Malam !");
