@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
 	private TextView tvSubGreeting;
     private ImageView greetingIcon;
     private ImageView greetingImage;
+	
+	private static final String URL_PERATURAN = "https://ihsan.smkn5sukoharjo.sch.id/skanmasafe/peraturan.html";
+	private static final String URL_TENTANG = "https://ihsan.smkn5sukoharjo.sch.id/skanmasafe/about.html";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 			webView.getSettings().setAllowFileAccess(true);
 			webView.getSettings().setAllowContentAccess(true);
 
-			webView.loadUrl("https://ihsan.smkn5sukoharjo.sch.id/skanmasafe/peraturan.html");
+			webView.loadUrl(URL_PERATURAN);
 
 			new AlertDialog.Builder(MainActivity.this)
 					.setView(dialogView)
@@ -91,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 			webView.getSettings().setAllowFileAccess(true);
 			webView.getSettings().setAllowContentAccess(true);
 
-			webView.loadUrl("https://ihsan.smkn5sukoharjo.sch.id/skanmasafe/about.html");
+			webView.loadUrl(URL_TENTANG);
 
 			new AlertDialog.Builder(MainActivity.this)
 					.setView(dialogView)
