@@ -274,16 +274,26 @@ public class ExamActivity extends AppCompatActivity {
 		super.onWindowFocusChanged(hasFocus);
 
 		if (!hasFocus && !isShowingExitDialog) {
-			// kasih delay biar nggak false-positive pas ada sistem toast "Got it"
-			new Handler(Looper.getMainLooper()).postDelayed(() -> {
-				if (!hasWindowFocus() && !isShowingExitDialog) { 
-					Toast.makeText(this, 
-							"Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian", 
-							Toast.LENGTH_LONG).show();
-					stopLockTask();
-					finish();
-				}
-			}, 800); // delay 0.8 detik (bisa disesuaikan 500-1000 ms)
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && 
+				Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
+				// Android 12 (S) & 13 (Tiramisu) → kasih delay supaya "Got it" / "Viewing full screen" nggak salah deteksi
+				new Handler(Looper.getMainLooper()).postDelayed(() -> {
+					if (!hasWindowFocus() && !isShowingExitDialog) {
+						Toast.makeText(this,
+								"Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian",
+								Toast.LENGTH_LONG).show();
+						stopLockTask();
+						finish();
+					}
+				}, 2000); // 1 detik delay
+			} else {
+				// Android 6–11, 14+ → langsung eksekusi
+				Toast.makeText(this,
+						"Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian",
+						Toast.LENGTH_LONG).show();
+				stopLockTask();
+				finish();
+			}
 		}
 	}
 
