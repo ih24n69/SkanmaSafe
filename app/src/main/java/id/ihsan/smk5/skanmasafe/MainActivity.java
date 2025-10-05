@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebView;
+import android.webkit.WebSettings;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -72,9 +73,18 @@ public class MainActivity extends AppCompatActivity {
 			View dialogView = inflater.inflate(R.layout.dialog_peraturan, null);
 			WebView webView = dialogView.findViewById(R.id.webViewDialog);
 			
-			webView.getSettings().setJavaScriptEnabled(false);
-			webView.getSettings().setAllowFileAccess(true);
-			webView.getSettings().setAllowContentAccess(true);
+			WebSettings settings = webView.getSettings();
+			settings.setJavaScriptEnabled(false);
+			settings.setAllowFileAccess(true);
+			settings.setAllowContentAccess(true);
+			
+			if (isNetworkAvailable()) {
+				// Kalau ada internet → selalu refresh konten baru
+				settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+			} else {
+				// Kalau offline → coba load dari cache
+				settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+			}
 
 			webView.loadUrl(URL_PERATURAN);
 
@@ -90,11 +100,18 @@ public class MainActivity extends AppCompatActivity {
 			View dialogView = inflater.inflate(R.layout.dialog_tentang, null);
 			WebView webView = dialogView.findViewById(R.id.webViewTentang);
 			
-			webView.getSettings().setJavaScriptEnabled(false);
-			webView.getSettings().setAllowFileAccess(true);
-			webView.getSettings().setAllowContentAccess(true);
-
-			webView.loadUrl(URL_TENTANG);
+			WebSettings settings = webView.getSettings();
+			settings.setJavaScriptEnabled(false);
+			settings.setAllowFileAccess(true);
+			settings.setAllowContentAccess(true);
+			
+			if (isNetworkAvailable()) {
+				// Kalau ada internet → selalu refresh konten baru
+				settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+			} else {
+				// Kalau offline → coba load dari cache
+				settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+			}
 
 			new AlertDialog.Builder(MainActivity.this)
 					.setView(dialogView)
@@ -147,4 +164,11 @@ public class MainActivity extends AppCompatActivity {
             greetingImage.setImageResource(R.drawable.take_sleep); // gambar tidur/bintang/lampu
         }
     }
+	
+	// Utility method untuk cek koneksi
+	private boolean isNetworkAvailable() {
+		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+		return activeNetwork != null && activeNetwork.isConnected();
+	}
 }
