@@ -28,7 +28,7 @@ Aplikasi Android ExamBrowser dengan nama SkanmaSafe, digunakan untuk ujian onlin
 		- Disable Enable Proteksi Webview Exam
 		- Token masuk per siswa, untuk memantau siswa
 		- dll ~
-	3. Bisa pembaruan via OTA (Over The Air,
+	3. Bisa pembaruan via OTA (Over The Air),
 	4. Homescreen yang lebih bagus.
 
 ## 🚀 Cara Menjalankan
