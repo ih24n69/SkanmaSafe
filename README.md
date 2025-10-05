@@ -1,8 +1,8 @@
 # SkanmaSafe
 
-Aplikasi Android untuk ujian berbasis browser.
+Aplikasi Android ExamBrowser dengan nama SkanmaSafe, digunakan untuk ujian online dengan smartphone Android.
 ---
-## 🚀 Fitur
+## 🚀 Fitur versi Publik
 
 	1. Block Navbar dan gesture
 	2. Block Statusbar
@@ -17,6 +17,19 @@ Aplikasi Android untuk ujian berbasis browser.
 	12. Statusbar custom tampilkan waktu/jam dan prosentase baterai
 	13. Greeting di halaman muka (Pagi,siang,sore,malam)
 	14. Diseting untuk adnroid API 28 (Android 9 "Pie") s/d API 36 (Android 16 "Baklava").
+	
+## 🚀 Fitur versi Private/Custom -> Wanna try Contact me by E-Mail.
+	1. Sama dengan versi Publik,
+	2. Penambahan web admin dengan konfigurasi custom (Real Time) sebagai berikut :
+		- URL Ujian
+		- Volume Max Alarm
+		- Token Keluar
+		- Greeting
+		- Disable Enable Proteksi Webview Exam
+		- Token masuk per siswa, untuk memantau siswa
+		- dll ~
+	3. Bisa pembaruan via OTA (Over The Air,
+	4. Homescreen yang lebih bagus.
 
 ## 🚀 Cara Menjalankan
 
