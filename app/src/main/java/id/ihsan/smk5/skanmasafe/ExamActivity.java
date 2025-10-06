@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
@@ -67,6 +68,8 @@ public class ExamActivity extends AppCompatActivity {
 	
 	// Monitoring Koneksi
 	private ConnectionStatusManager connectionStatusManager;
+	
+	private boolean isLegitExit = false;
 
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
     @Override
@@ -297,6 +300,7 @@ public class ExamActivity extends AppCompatActivity {
 		}
 	}
 
+
     /** Konfirmasi keluar ujian */
     private void showExitDialog() {
         isShowingExitDialog = true;
@@ -305,7 +309,9 @@ public class ExamActivity extends AppCompatActivity {
                 .setMessage("Yakin ingin keluar dari ujian?")
                 .setPositiveButton("Ya", (dialog, which) -> {
                     isShowingExitDialog = false;
-                    stopLockTask();
+					isLegitExit = true;
+                    stopLockTask();		
+					triggerNormalExitAlarm();
                     finish();
                 })
                 .setNegativeButton("Tidak", (dialog, which) -> {
@@ -365,7 +371,7 @@ public class ExamActivity extends AppCompatActivity {
         return activeNetwork != null && activeNetwork.isConnected();
     }
 
-    /** Scrren pinning */
+    /** Screen pinning */
     private void startLockTaskMode() {
 		ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 		if (am.getLockTaskModeState() == ActivityManager.LOCK_TASK_MODE_NONE) {
@@ -418,7 +424,9 @@ public class ExamActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 		stopLockTask();
-        triggerAlarm();
+        if (!isLegitExit) {
+            triggerAlarm();
+        }
     }
 
     @Override
@@ -469,5 +477,22 @@ public class ExamActivity extends AppCompatActivity {
 			fabMain.setVisibility(View.VISIBLE);
 		}
 	}
+	
+	/** Keluar ujian dengan Sah */
+	private void triggerNormalExitAlarm() {
+		Log.d("Exam", "Ujian selesai dengan sah");
+        try {
+            AudioManager audio = (AudioManager) getSystemService(AUDIO_SERVICE);
+            int maxVol = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            audio.setStreamVolume(AudioManager.STREAM_MUSIC, maxVol, 0);
+
+            alarmPlayer = MediaPlayer.create(this,
+                    Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.legit_alarm));
+            alarmPlayer.setLooping(false);
+            alarmPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
