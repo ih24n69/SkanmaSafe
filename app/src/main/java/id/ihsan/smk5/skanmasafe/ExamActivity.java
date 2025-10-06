@@ -416,8 +416,8 @@ public class ExamActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        stopLockTask();
         super.onStop();
+		stopLockTask();
         triggerAlarm();
     }
 
