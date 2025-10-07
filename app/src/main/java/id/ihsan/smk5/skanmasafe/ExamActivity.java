@@ -35,6 +35,7 @@ import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
 import android.webkit.WebSettings;
@@ -119,14 +120,8 @@ public class ExamActivity extends AppCompatActivity {
         connectionStatusManager = new ConnectionStatusManager(this, statusIcon, statusText);
         connectionStatusManager.startMonitoring();
 
-        // === Blokir screenshot & rekam layar ===
-        getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_SECURE,
-                WindowManager.LayoutParams.FLAG_SECURE
-        );
-
-        // === Keep screen ON ===
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        /** Blokir screenshot & rekam layar. Layar tetap hidup */
+        secureAndKeepScreenOn();
 
         WebView webView = findViewById(R.id.webView);
 
@@ -206,46 +201,7 @@ public class ExamActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-
-        // Android 6 - 11 → hanya bisa warning overlay dan kembali ke halaman awal
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-            if (Settings.canDrawOverlays(this)) {
-                Toast.makeText(this,
-                        "Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum melanjutkan ujian!",
-                        Toast.LENGTH_LONG).show();
-                stopLockTask();
-                finish();
-            }
-        }
-        if ((getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
-            getWindow().setFlags(
-                    WindowManager.LayoutParams.FLAG_SECURE,
-                    WindowManager.LayoutParams.FLAG_SECURE
-            );
-        }
-        // === Blokir overlay eksternal (Android 12+) ===
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            try {
-                getWindow().setHideOverlayWindows(true);
-            } catch (SecurityException e) {
-                e.printStackTrace();
-                Toast.makeText(this,
-                        "Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum ujian!",
-                        Toast.LENGTH_LONG).show();
-                stopLockTask();
-                finish();
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                if (isInMultiWindowMode() || isInPictureInPictureMode()) {
-                    Toast.makeText(this,
-                            "Mode multi-window / PiP tidak diizinkan saat ujian",
-                            Toast.LENGTH_LONG).show();
-                    stopLockTask();
-                    finish();
-                }
-            }
-        }
+		checkOverlayAndSecurity();
 		updateFabVisibility();
     }
 
@@ -299,7 +255,62 @@ public class ExamActivity extends AppCompatActivity {
 			}
 		}
 	}
+		
+	/** Anti Overlay */
+	private void checkOverlayAndSecurity() {
+		/** Android 6 - 11 → hanya bisa warning overlay dan kembali ke halaman awal */
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+				Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+			if (Settings.canDrawOverlays(this)) {
+				Toast.makeText(this,
+						"Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum melanjutkan ujian!",
+						Toast.LENGTH_LONG).show();
+				stopLockTask();
+				finish();
+				return;
+			}
+		}
 
+		/** Blokir overlay eksternal (Android 12+) */
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+			try {
+				getWindow().setHideOverlayWindows(true);
+			} catch (SecurityException e) {
+				e.printStackTrace();
+				Toast.makeText(this,
+						"Nonaktifkan aplikasi overlay (chat head, filter layar, dsb) sebelum ujian!",
+						Toast.LENGTH_LONG).show();
+				stopLockTask();
+				finish();
+				return;
+			}
+
+			/** Cegah multi-window / PiP */
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				if (isInMultiWindowMode() || isInPictureInPictureMode()) {
+					Toast.makeText(this,
+							"Mode multi-window / PiP tidak diizinkan saat ujian",
+							Toast.LENGTH_LONG).show();
+					stopLockTask();
+					finish();
+				}
+			}
+		}
+	}
+	
+	/** Anti Screenshood,screenrecord, layar tetap nyala ketika ujian */
+	private void secureAndKeepScreenOn() {
+		Window window = getWindow();
+		WindowManager.LayoutParams params = window.getAttributes();
+
+		// Aktifkan FLAG_SECURE jika belum aktif
+		if ((params.flags & WindowManager.LayoutParams.FLAG_SECURE) == 0) {
+			window.setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
+		}
+
+		// Pastikan layar tetap hidup
+		window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+	}
 
     /** Konfirmasi keluar ujian */
     private void showExitDialog() {
@@ -495,4 +506,3 @@ public class ExamActivity extends AppCompatActivity {
         }
     }
 }
-
