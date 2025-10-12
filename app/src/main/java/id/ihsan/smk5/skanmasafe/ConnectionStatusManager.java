@@ -1,20 +1,6 @@
-/*
- * Copyright (C) 2025 Muhammad Ihsan
-  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package id.ihsan.smk5.skanmasafe;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
@@ -24,6 +10,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.concurrent.Executors;
 
 public class ConnectionStatusManager {
 
@@ -61,24 +52,52 @@ public class ConnectionStatusManager {
         Network network = cm.getActiveNetwork();
         NetworkCapabilities nc = cm.getNetworkCapabilities(network);
 
-        if (nc != null && nc.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
-            int downSpeed = nc.getLinkDownstreamBandwidthKbps();
-            updateStatusBar(downSpeed);
-            isConnected = true;
-        } else if (nc != null) {
-            updateStatusBar(1); // koneksi lemah
-            isConnected = true;
-        } else {
-            updateStatusBar(0); // koneksi hilang
+        if (nc == null) {
+            updateStatusBar(0);
             if (isConnected) {
                 isConnected = false;
                 showConnectionLostDialog();
             }
+            return;
+        }
+
+        // Tes koneksi internet sungguhan (bukan hanya Wi-Fi tersambung)
+        Executors.newSingleThreadExecutor().execute(() -> {
+            boolean hasInternet = hasInternetAccess();
+
+            ((Activity) context).runOnUiThread(() -> {
+                if (hasInternet) {
+                    int downSpeed = nc.getLinkDownstreamBandwidthKbps();
+                    updateStatusBar(downSpeed);
+                    isConnected = true;
+                } else {
+                    updateStatusBar(1); // dianggap lemah karena tidak ada akses internet
+                    if (isConnected) {
+                        isConnected = false;
+                        showConnectionLostDialog();
+                    }
+                }
+            });
+        });
+    }
+
+    /** Cek koneksi internet nyata dengan HTTP ke Google (204 response = OK) */
+    public boolean hasInternetAccess() {
+        try {
+            HttpURLConnection urlConnection =
+                    (HttpURLConnection) new URL("https://clients3.google.com/generate_204").openConnection();
+            urlConnection.setConnectTimeout(2000);
+            urlConnection.setReadTimeout(2000);
+            urlConnection.setInstanceFollowRedirects(false);
+            urlConnection.connect();
+            return urlConnection.getResponseCode() == 204 && urlConnection.getContentLength() == 0;
+        } catch (IOException e) {
+            return false;
         }
     }
 
     private void updateStatusBar(int speedKbps) {
-        ((android.app.Activity) context).runOnUiThread(() -> {
+        ((Activity) context).runOnUiThread(() -> {
             if (speedKbps > 500) {
                 statusIcon.setImageResource(R.drawable.ic_signal_good);
                 statusText.setText("Koneksi bagus");
@@ -96,13 +115,39 @@ public class ConnectionStatusManager {
     }
 
     private void showConnectionLostDialog() {
-        ((android.app.Activity) context).runOnUiThread(() -> {
-            new AlertDialog.Builder(context)
-                    .setTitle("Koneksi Terputus")
-                    .setMessage("Koneksi internet terputus. Silakan periksa jaringan Anda.")
-                    .setPositiveButton("OK", null)
-                    .setCancelable(false)
-                    .show();
-        });
-    }
+		Activity activity = (Activity) context;
+
+		activity.runOnUiThread(() -> {
+			if (activity.isFinishing()) return;
+
+			// Tambahkan flag agar onWindowFocusChanged tahu ini dialog aman
+			if (activity instanceof ExamActivity) {
+				((ExamActivity) activity).isShowingConnectionDialog = true;
+			}
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+			builder.setTitle("Koneksi Terputus")
+					.setMessage("Tidak ada akses internet. Periksa jaringan Anda.")
+					.setCancelable(false)
+					.setPositiveButton("OK", (dialog, which) -> {
+						if (activity instanceof ExamActivity) {
+							((ExamActivity) activity).isShowingConnectionDialog = false;
+						}
+						dialog.dismiss();
+					})
+					.setOnCancelListener(dialog -> {
+						if (activity instanceof ExamActivity) {
+							((ExamActivity) activity).isShowingConnectionDialog = false;
+						}
+					});
+
+			AlertDialog dialog = builder.create();
+
+			// Pastikan dialog di atas activity yang sama (bukan overlay)
+			dialog.getWindow().setType(android.view.WindowManager.LayoutParams.TYPE_APPLICATION_PANEL);
+
+			dialog.show();
+		});
+	}
+
 }

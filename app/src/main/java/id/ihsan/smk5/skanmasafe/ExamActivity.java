@@ -38,6 +38,10 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.OvershootInterpolator;
+import android.webkit.RenderProcessGoneDetail;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -71,6 +75,7 @@ public class ExamActivity extends AppCompatActivity {
 	private ConnectionStatusManager connectionStatusManager;
 	
 	private boolean isLegitExit = false;
+	public boolean isShowingConnectionDialog = false;
 
     private BroadcastReceiver batteryReceiver = new BroadcastReceiver() {
     @Override
@@ -124,6 +129,30 @@ public class ExamActivity extends AppCompatActivity {
         secureAndKeepScreenOn();
 
         WebView webView = findViewById(R.id.webView);
+		
+		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+				// Diam saja supaya WebView tidak ubah tampilan atau reload
+				Log.w("ExamActivity", "Koneksi error (ignore): " + error.getDescription());
+			}
+
+			@Override
+			public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse errorResponse) {
+				// Diam juga untuk HTTP error (misal 404 saat koneksi putus)
+				Log.w("ExamActivity", "HTTP error (ignore): " + errorResponse.getStatusCode());
+			}
+
+			@Override
+			public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+				// Log dulu biar tahu apa yang terjadi
+				Log.e("ExamActivity", "Render process gone (crash or low memory)");
+
+				// Kalau kamu mau biar WebView tidak reload otomatis:
+				// cukup return true -> berarti kamu "menangani" event-nya sendiri.
+				return true;
+			}
+		});
 
         // FAB Menu
         fabMain = findViewById(R.id.fabMain);
@@ -157,9 +186,10 @@ public class ExamActivity extends AppCompatActivity {
         // WebView setting
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+		webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+		webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         webSettings.setDomStorageEnabled(true);
         webSettings.setDatabaseEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setSaveFormData(true);
         webSettings.setDefaultTextEncodingName("utf-8");
         webSettings.setLoadsImagesAutomatically(true);
@@ -232,12 +262,12 @@ public class ExamActivity extends AppCompatActivity {
 	public void onWindowFocusChanged(boolean hasFocus) {
 		super.onWindowFocusChanged(hasFocus);
 
-		if (!hasFocus && !isShowingExitDialog) {
+		if (!hasFocus && !isShowingExitDialog && !isShowingConnectionDialog) {
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && 
 				Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
 				// Android 12 (S) & 13 (Tiramisu) → kasih delay supaya "Got it" / "Viewing full screen" nggak salah deteksi
 				new Handler(Looper.getMainLooper()).postDelayed(() -> {
-					if (!hasWindowFocus() && !isShowingExitDialog) {
+					if (!hasWindowFocus() && !isShowingExitDialog && !isShowingConnectionDialog) {
 						Toast.makeText(this,
 								"Aplikasi overlay terdeteksi, tutup dulu untuk melanjutkan ujian",
 								Toast.LENGTH_LONG).show();
